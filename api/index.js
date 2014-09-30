@@ -48,32 +48,7 @@ app.use(function(req, res, next) {
 auth.set(app);
 
 // serve app from server
-app.use(express.static(__dirname + '/frontend'));
-
-app.get('/users/me', function(req, res) {
-  if (req.user) {
-    res.json(user);
-  } else {
-    res.json(403, { message: 'Not authorized' });
-  }
-});
-
-var funnyPicIndex = Math.floor(Math.random()*12);
-function getNextFunnyPic() {
-  funnyPicIndex++;
-  if (funnyPicIndex > 12) {
-    funnyPicIndex = 0;
-  }
-  return __dirname + '/funny-pics/' + funnyPicIndex + '.jpg';
-}
-
-app.get('/funny-pic', function(req, res) {
-  if (req.user) {
-    res.sendfile(getNextFunnyPic());
-  } else {
-    res.json(403, { message: 'Not authorized' });
-  }
-});
+app.use(express.static(__dirname + '/client'));
 
 var checkUser = function(req, res, next) {
 	if(req.user) {
@@ -85,6 +60,15 @@ var checkUser = function(req, res, next) {
 		res.json(403, { message: 'Not authorized' });
 	}
 };
+
+/* Route for getting authenticated user information */
+app.get('/users/me', function(req, res) {
+  if (req.user) {
+    res.json(user);
+  } else {
+    res.json(403, { message: 'Not authorized' });
+  }
+});
 
 app.get('/videos', checkUser, videoController.getVideos);
 app.post('/videos', checkUser, videoController.postVideos);
