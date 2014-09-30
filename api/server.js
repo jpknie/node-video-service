@@ -9,11 +9,11 @@ var mongoose = require('mongoose');
 var LocalStrategy = require('passport-local').Strategy;
 var fs = require('fs');
 
-var Video = require('./models/video');
+var Movie = require('./models/movie');
 
-var videoController = require('./controllers/video');
+var movieController = require('./controllers/movie');
 
-var db = mongoose.connect("mongodb://localhost/videos");
+var db = mongoose.connect("mongodb://localhost/movies");
 
 var app = express();
 
@@ -70,8 +70,8 @@ app.get('/users/me', function(req, res) {
   }
 });
 
-app.get('/videos', checkUser, videoController.getVideos);
-app.post('/videos', checkUser, videoController.postVideos);
+app.get('/movies', checkUser, movieController.getMovies);
+app.post('/movies', checkUser, movieController.postMovies);
  
 // listen on port
 var server = app.listen(3000, function() {

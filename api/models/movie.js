@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 
 
-var VideoSchema = mongoose.Schema({
+var MovieSchema = mongoose.Schema({
 
 	userId: { type: String, required: false },
 	title: { type: String, required: true },
@@ -12,4 +12,4 @@ var VideoSchema = mongoose.Schema({
 
 });
 
-module.exports = mongoose.model('Video', VideoSchema);
+module.exports = mongoose.model('Movie', MovieSchema);
