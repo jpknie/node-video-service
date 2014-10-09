@@ -12,4 +12,8 @@ var MovieSchema = mongoose.Schema({
 
 });
 
+MovieSchema.set('toJSON', {
+    virtuals: true
+});
+
 module.exports = mongoose.model('Movie', MovieSchema);
