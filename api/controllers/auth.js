@@ -13,7 +13,7 @@ module.exports.set = function(app) {
       	return next(err);
     	}
 	    if (!user) {
-  	    return res.json(404, 'No user found...');
+				return res.json(404, info);
     	}
 	    req.logIn(user, function(err) {
   	    if (err) {
@@ -21,6 +21,7 @@ module.exports.set = function(app) {
       	}
 				var jwtSuperSecretCode = app.get('jwtSuperSecretCode');
 	      var token = jwt.sign({
+					id: user._id,
   	      username: user.username,
 					password: user.password
 					//expires: use momentjs to calculate from this moment + 1 hour or something
@@ -37,12 +38,15 @@ module.exports.set = function(app) {
 
 	// setup passport
 	passport.use(new LocalStrategy(function(username, password, done) {
-		console.log("Trying to find username: "+username+ " password: " + password);
-		User.findOne({ username: username, password: password }, function(err, user) {
-			if(err) {
+		User.findOne({ username: username }, function(err, user) {
+			if(!user) {
 				return done(null, false, { message: 'Incorrect username or password' });
 			}
-			return done(null, user);
+			user.comparePassword(password, function(err, isMatch) {
+				if(err || !isMatch)
+					return done(null, false, { message: 'Incorrect username or password' });
+				return done(null, user);
+			});
 		});
 	}));
 
