@@ -13,7 +13,7 @@ var UserModel = require('./models/user')
 /**
  * Connect to the database
  */
-mongoose.connect('mongodb://localhost/videos');
+mongoose.connect('mongodb://localhost/movies');
 
 var db = mongoose.connection;
 
