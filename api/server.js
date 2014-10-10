@@ -73,9 +73,8 @@ app.get('/users/me', function(req, res) {
 app.get('/api/movies', checkUser, movieController.getMovies);
 app.get('/api/movies/:movie_id', checkUser, movieController.getMovie);
 app.get('/api/movies/:movie_id/play', checkUser, movieController.playMovie);
-app.get('/api/movies/:movie_id/subtitle', checkUser, movieController.getSubtitle);
-app.post('/api/movies/:movie_id/file', checkUser, movieController.uploadMovie);
-app.post('/api/movies/:movie_id/subtitle', checkUser, movieController.uploadSubtitle);
+//app.get('/api/movies/:movie_id/subtitle', checkUser, movieController.getSubtitle);
+app.post('/api/movies/:movie_id/file', checkUser, movieController.uploadFile);
 app.post('/api/movies', checkUser, movieController.postMovies);
 app.put('/api/movies/:movie_id', checkUser, movieController.putMovie);
  
