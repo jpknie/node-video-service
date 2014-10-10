@@ -102,6 +102,22 @@ module.exports.getMovies = function(req, res) {
 
 };
 
+module.exports.thumbnail = function(req, res) {
+	Movie.findOne({ _id: req.params.movie_id }, function(err, movie) {
+		if(err) {
+			return res.status(404).json('{ message: "Movie not found!" }');
+		}
+		console.log(movie.thumbnail);
+		console.log(movie.filename);
+		if(movie.thumbnail != null) {
+			return res.status(200).sendFile(path.join(getMediaDirectoryForId(movie.id), movie.thumbnail));
+		}
+		else {
+			return res.status(404).json('{ message: "No thumbnail" }');
+		}
+	});
+};
+
 module.exports.uploadFile = function(req, res) {
 	if(!req.files)
 		 return	res.json('{ message: "Encountered an error on file upload" }');
@@ -134,11 +150,11 @@ module.exports.uploadFile = function(req, res) {
 			}
 			/* Create thumbnail */
 			var proc = new ffmpeg(actualMovieFilepath)
-			.takeScreenshots({count: 1, timemarks: ['10'], filename: 'tn.png'}, movieDir, function(err) {
+			.takeScreenshots({count: 1, timemarks: ['10']}, movieDir, function(err) {
 				if(err)
 					throw err;
 			});
-			movie.thumbnail = 'tn.png';
+			movie.thumbnail = 'tn_1.png';
 			movie.filename = req.files.file.name;
 		}
 
