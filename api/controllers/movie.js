@@ -107,8 +107,6 @@ module.exports.thumbnail = function(req, res) {
 		if(err) {
 			return res.status(404).json('{ message: "Movie not found!" }');
 		}
-		console.log(movie.thumbnail);
-		console.log(movie.filename);
 		if(movie.thumbnail != null) {
 			return res.status(200).sendFile(path.join(getMediaDirectoryForId(movie.id), movie.thumbnail));
 		}
