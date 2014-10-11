@@ -79,11 +79,67 @@ module.exports.getMovie = function(req, res) {
 };
 
 module.exports.playMovie = function(req, res) {
+	Movie.findOne({ _id: req.params.movie_id }, function(err, movie) {
+		if(err) {
+			return res.json(404, '{ message: "Movie not found!" }');
+		}
+		if(movie.filename != null) {
+				var file = path.join(getMediaDirectoryForId(movie.id), movie.filename);
 
+				fs.stat(file, function(err, stats) {
+					var total = stats.size;
+					if(req.headers.range) {
+						var range = req.headers.range;
+						var positions = range.replace(/bytes=/, "").split("-");
+						var start = parseInt(positions[0], 10);
+						var end = positions[1] ? parseInt(positions[1], 10) : total - 1;
+						var chunkSize = (end - start) + 1;
+							res.writeHead(206, {
+								"Content-Range": "bytes " + start + "-" + end + "/" + total,
+								"Accept-Ranges": "bytes",
+								"Content-Length": chunkSize,
+								"Content-Type": "video/mp4"
+							});
+
+						var pipeThis = fs.createReadStream(file, {start: start, end: end});
+						res.openedFile = pipeThis;
+						pipeThis.pipe(res);
+						res.on('close', function() {
+							res.openedFile.unpipe(this);
+							fs.close(this.openedFile.fd);
+						});
+					}
+					else {
+						res.writeHead(200, { "Content-Length": total, "Content-Type": "video/mp4" });
+
+						var pipeThis = fs.createReadStream(file);
+						res.openedFile = pipeThis;
+						pipeThis.pipe(res);
+						res.on('close', function() {
+							res.openedFile.unpipe(this);
+							fs.close(this.openedFile.fd);
+						});
+					}
+			});
+		}
+		else {
+			return res.status(404).json('{ message: "No movie file" }');
+		}
+	});
 };
 
-module.exports.getSubtitle = function(req, res) {
-
+module.exports.subtitle = function(req, res) {
+	Movie.findOne({ _id: req.params.movie_id }, function(err, movie) {
+		if(err) {
+			return res.json(404, '{ message: "Movie not found!" }');
+		}
+		if(movie.subtitle != null) {
+			return res.status(200).sendFile(path.join(getMediaDirectoryForId(movie.id), movie.subtitle));
+		}
+		else {
+			return res.status(404).json('{ message: "No subtitle" }');
+		}
+	});
 };
 
 module.exports.deleteMovie = function(req, res) {
@@ -118,7 +174,7 @@ module.exports.thumbnail = function(req, res) {
 
 module.exports.uploadFile = function(req, res) {
 	if(!req.files)
-		 return	res.json('{ message: "Encountered an error on file upload" }');
+		 return	res.json(500, '{ message: "Encountered an error on file upload" }');
 
 	Movie.findOne({ _id: req.params.movie_id }, function(err, movie) {
 		if(err) {
@@ -135,8 +191,6 @@ module.exports.uploadFile = function(req, res) {
 		var movieDir = getMediaDirectoryForId(movie._id) + '/';
 		var fileExtension = req.files.file.name.split(".")[1];
 		var actualMovieFilepath = path.join(movieDir, req.files.file.name);
-
-		console.log("File mime type is " + mime.lookup(req.files.file.path));
 
 		/* Check if sending movie */
 		if(acceptedMovieTypes.indexOf(mime.lookup(req.files.file.path)) > -1) {
