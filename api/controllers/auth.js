@@ -3,7 +3,6 @@ var expressJwt = require('express-jwt');
 var jwt = require('jsonwebtoken');
 var LocalStrategy = require('passport-local').Strategy;
 var User = require('../models/user');
-var Expire = require('../models/expire');
 var crypto = require('crypto');
 var fs = require('fs-extra');
 var path = require('path');
@@ -31,29 +30,6 @@ module.exports.set = function(app) {
   	      username: user.username,
 					password: user.password
 	      }, jwtSuperSecretCode, { expiresInMinutes: 60 });
-				var hash = crypto.createHash('md5').update(token).digest('hex');
-				var expire = new Expire();
-				expire.timeout = moment().min(3).unix();
-				expire.userId = user._id;
-				expire.token = hash;
-				expire.save(function(err) {
-					if(err) {
-						console.log("Couldn't set expiration data");
-						return next(err);
-					}
-				});
-				var destPath = path.join(path.join(appDir, 'tmp'), hash);
-				var srcPath = path.join(appDir, 'media');
-				fs.mkdir(destPath, function(err) {
-					if(err) {
-						return next(err);
-					}
-				});
-				fs.symlink(srcPath, destPath + '/media', 'dir', function(err) {
-					if(err) {
-						return next(err);
-					}
-				});
   	    return res.json(200, { token: token, user: user });
 	    });
 	  })(req, res, next);
